@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+    <head>
+        <title>Teste José Severiano</title>
+    <style>
+        button{
+            padding: 10px;
+            margin: 60px;
+            background-color: orange;
+            font-size: 42px;
+        }
+        div{
+            text-align: center;
+            font-size: 100px;
+            color: orangered;
+            border: solid;
+        }
+       
+        body{
+            text-align: center;
+        }
+    </style>
+    </head>
+<body>
+<div>Teste MQTT-HTML</div><br>
+</p>
+<img id="myImage" src="pic_bulboff.gif" width="100" height="180"><br>
+</span text-align: center;>
+<button onClick="turnOnLED()">Liga LED</button>
+<button onClick="turnOffLED()">Desliga LED</button>
+
+<script>
+var MQTT_CLIENT = new Paho.MQTT.Client("192.168.1.5", 3000,"")
+MQTT_CLIENT.connect({ onSuccess: myClientConnected });
+
+// This is the function which handles subscribing to topics after a connection is made
+function myClientConnected() {
+  ///*****topic******// with the exact same value that you used in your Arduino code where you are publishing messages.
+  MQTT_CLIENT.subscribe("FromESPtoWeb/door"); 
+}
+function turnOnLED() {
+  // create a new MQTT message with a specific payload
+  var mqttMessage = new Paho.MQTT.Message("1");
+
+  // Set the topic it should be published to
+  mqttMessage.destinationName = "event3";          ///*****topic******// send to  MQTT_CLIENT.send(mqttMessage); 
+
+  // Publish the message
+  MQTT_CLIENT.send(mqttMessage);
+  var image = document.getElementById('myImage')
+  image.src = "pic_bulbon.gif";
+}
+function turnOffLED() {
+  // create a new MQTT message with a specific payload
+  var mqttMessage = new Paho.MQTT.Message("0");
+
+  // Set the topic it should be published to
+  mqttMessage.destinationName = "event3";         ///*****topic******// send to  MQTT_CLIENT.send(mqttMessage); 
+
+
+  // Publish the message
+  MQTT_CLIENT.send(mqttMessage);
+  var image = document.getElementById('myImage')
+  image.src = "pic_bulboff.gif"
+}
+
+
+</script>
+
+</body>
+</html>
