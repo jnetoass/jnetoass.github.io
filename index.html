@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="dist/circle-progress.js"></script>
     <head>
         <title>Teste José Severiano</title>
     <style>
@@ -20,6 +22,23 @@
         body{
             text-align: center;
         }
+        .circle {
+	width: 200px;
+    margin: 6px 20px 20px;
+    display: inline-block;
+    position: relative;
+    text-align: center;
+    vertical-align: top;
+}
+    section {
+		position: absolute;
+		top: 70px;
+		left: 0;
+		width: 100%;
+		text-align: center;
+		line-height: 45px;
+		font-size: 43px;
+	}
     </style>
     </head>
 <body>
@@ -28,16 +47,30 @@
 <img id="myImage" src="pic_bulboff.gif" width="100" height="180"><br>
 </span text-align: center;>
 <button onClick="turnOnLED()">Liga LED</button>
-<button onClick="turnOffLED()">Desliga LED</button>
-
+<button onClick="turnOffLED()">Desliga LED</button><br>
+<div class="circle" id="circle-a">
+  <section></section>
+</div>
 <script>
-var MQTT_CLIENT = new Paho.MQTT.Client("192.168.1.5", 3000,"")
-MQTT_CLIENT.connect({ onSuccess: myClientConnected });
 
+
+ //var a = ""
+  // adiciona o novo elemento criado e seu conteúdo ao DOM 
+  //var divAtual = document.getElementById("span1"); 
+  //divNova.innerHTML = elm 
+  //document.body.insertBefore(divNova, divAtual)
+   
+
+var MQTT_CLIENT = new Paho.MQTT.Client("localhost", 3000,"")
+MQTT_CLIENT.connect({ onSuccess: myClientConnected });
+MQTT_CLIENT.onMessageArrived = onMessageArrived
+MQTT_CLIENT.onConnectionLost = onConnectionLost
 // This is the function which handles subscribing to topics after a connection is made
 function myClientConnected() {
   ///*****topic******// with the exact same value that you used in your Arduino code where you are publishing messages.
   MQTT_CLIENT.subscribe("FromESPtoWeb/door"); 
+  MQTT_CLIENT.subscribe('temp', {qos: 0});
+   
 }
 function turnOnLED() {
   // create a new MQTT message with a specific payload
@@ -64,8 +97,32 @@ function turnOffLED() {
   var image = document.getElementById('myImage')
   image.src = "pic_bulboff.gif"
 }
+function onConnectionLost(responseObject) {
+  if (responseObject.errorCode !== 0) {
+    console.log("onConnectionLost:"+responseObject.errorMessage);
 
+  }
+}
 
+function onMessageArrived(message) {
+  console.log("onMessageArrived:"+message.payloadString);
+  //tempGauge.setValue(message.payloadString)
+  
+ //var a = parseInt (message.payloadString)
+  var progressBarOptions = {
+	startAngle: -1.55,
+	size: 200,
+    value: message.payloadString,
+    fill: {
+		color: '#ffa500'
+	}
+} 
+$('.circle').circleProgress(progressBarOptions).on('circle-animation-progress', function(event, progress, stepValue) {
+	$(this).find('section').text(String(stepValue*100));
+}); 
+}
+ 
+//console.log(a)
 </script>
 
 </body>
